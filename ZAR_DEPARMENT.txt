@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_DEPARMENT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_DEPARMENT.
+
+PARAMETERS p_EMP_id TYPE ty_zar_makt-empid.
+
+TYPES : BEGIN OF ty_zar_makt,
+  empid TYPE zar_makt-empid,
+  name TYPE zar_makt-name,
+  ckey TYPE zar_makt-ckey,
+  salary TYPE zar_makt-salary,
+  d_code TYPE zar_makt-d_code,
+
+ DATA : st_zar_makt-empid TYPE ty_zar_makt-empid.
+ DATA v_d_dept TYPE Zdep_makt-deptdes.
+
+SELECT SINGLE name salary ckey d_code  FROM zar_makt INTO st_zar_makt WHERE emp_id EQ p_emp_id.
+SELECT SINGLE  deptdes  FROM zdept_makt INTO v_d_dept WHERE d_code EQ  st_zar_makt-d_code
+
+  WRITE : /st_zar_makt-empid,
+         st_zar_makt-name,
+         st_zar_makt-ckey,
+         st_zar_makt-salary,
+         st_zar_makt-d_code,
+         v_d_dept.
+
+  ENDSELECT.

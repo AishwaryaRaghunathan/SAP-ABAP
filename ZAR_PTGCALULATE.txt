@@ -1,0 +1,34 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_PTGCALULATE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_PTGCALULATE.
+
+PARAMETERS: p_amt TYPE p LENGTH 10 DECIMALS 2,
+            p_ptg TYPE p LENGTH 10 DECIMALS 2,
+            p_days TYPE i,
+            p_SI AS CHECKBOX.
+
+DATA: s_interest TYPE p LENGTH 10 DECIMALS 2,
+      c_interest TYPE p LENGTH 10 DECIMALS 2,
+      total_value TYPE p LENGTH 10 DECIMALS 2,
+      years TYPE p DECIMALS 2.
+
+years = p_days / 365.
+
+IF p_SI = Abap_true.
+  s_interest = ( p_amt * p_ptg * years ) / 100.
+  total_value = p_amt + s_interest.
+  WRITE: / 'Initial Amount:', p_amt,
+         / 'Number of Days:', p_days,
+         / 'Simple Interest:', s_interest,
+         / 'Total Amount Paid:', total_value.
+ELSE.
+  c_interest = p_amt * ( ( 1 + p_ptg / 100 ) ** years - 1  ).
+  total_value = p_amt + c_interest.
+  WRITE: / 'Initial Amount:', p_amt,
+         / 'Number of Days:', p_days,
+         / 'Compound Interest:', c_interest,
+         / 'Total Amount Paid:', total_value.
+ENDIF.

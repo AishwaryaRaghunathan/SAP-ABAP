@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_PLANTNUMBER
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_PLANTNUMBER.
+
+TYPES: BEGIN OF ty_marc,
+   matnr TYPE marc-matnr,
+   werks TYPE marc-werks,
+
+  END OF ty_marc.
+
+  DATA: st_marc TYPE ty_marc,
+   v_name1 TYPE t001w-name1.
+
+  PARAMETERS p_matnr TYPE marc-matnr.
+
+  WRITE : / 'Material Number',
+            40 'Plant Number',
+            80 'Plant Name'.
+
+  SELECT matnr werks FROM marc INTO st_marc WHERE matnr EQ p_matnr .
+    SELECT SINGLE name1 FROM t001w INTO v_name1 WHERE werks EQ st_marc-werks.
+
+    WRITE : / st_marc-matnr,
+      40 st_marc-werks,
+      80 v_name1.
+
+    ENDSELECT.

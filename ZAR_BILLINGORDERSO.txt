@@ -1,0 +1,115 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_BILLINGORDERSO
+*&---------------------------------------------------------------------*
+REPORT zar_billingorderso.
+
+TYPES: BEGIN OF ty_vbak,
+         vbeln TYPE vbak-vbeln,
+         audat TYPE vbak-audat,
+         netwr TYPE vbak-netwr,
+         kunnr TYPE vbak-kunnr,
+       END OF ty_vbak.
+
+TYPES: BEGIN OF ty_vbap,
+         vbeln  TYPE vbap-vbeln,
+         posnr  TYPE vbap-posnr,
+         pstyv  TYPE vbap-pstyv,
+         arktx  TYPE vbap-arktx,
+         kwmeng TYPE vbap-kwmeng,
+         zieme  TYPE vbap-zieme,
+         netwr  TYPE vbap-netwr,
+       END OF ty_vbap.
+
+TYPES: BEGIN OF ty_t006a,
+         msehi TYPE t006a-msehi,
+         msehl TYPE t006a-msehl,
+       END OF ty_t006a.
+
+TYPES: BEGIN OF ty_kna1,
+         kunnr TYPE kna1-kunnr,
+         name1 TYPE kna1-name1,
+       END OF ty_kna1.
+
+DATA: it_vbap TYPE TABLE OF ty_vbap,
+      wa_vbap LIKE LINE OF it_vbap,
+      it_vbak TYPE TABLE OF ty_vbak,
+      wa_vbak LIKE LINE OF it_vbak,
+      it_t006a TYPE TABLE OF ty_t006a,
+      wa_t006a LIKE LINE OF it_t006a,
+      it_kna1 TYPE TABLE OF ty_kna1,
+      wa_kna1 LIKE LINE OF it_kna1,
+      pvbeln TYPE vbap-vbeln,
+      total_order_quantity TYPE vbap-kwmeng,
+      total_net_value TYPE vbap-netwr.
+
+
+SELECT-OPTIONS s_vbeln FOR wa_vbak-vbeln.
+
+SELECT  vbeln audat netwr kunnr FROM vbak INTO TABLE it_vbak WHERE vbeln IN s_vbeln.
+
+SELECT  kunnr name1 FROM kna1 INTO TABLE it_kna1 FOR ALL ENTRIES IN it_vbak WHERE kunnr EQ it_vbak-kunnr.
+
+SELECT  vbeln posnr pstyv arktx kwmeng zieme netwr FROM vbap INTO TABLE it_vbap WHERE vbeln IN s_vbeln.
+
+SELECT msehi msehl FROM t006a INTO TABLE it_t006a FOR ALL ENTRIES IN it_vbap WHERE spras EQ sy-langu AND msehi EQ it_vbap-zieme.
+DATA lv_tabix LIKE sy-tabix.
+DATA wa_vbap_temp LIKE wa_vbap.
+LOOP AT it_vbap INTO wa_vbap.
+  wa_vbap_temp = wa_vbap.
+  lv_tabix = sy-tabix.
+  READ TABLE it_vbak INTO wa_vbak WITH  KEY vbeln = wa_vbap-vbeln.
+
+*IF wa_vbap-vbeln NE pvbeln.
+*IF lv_tabix NE 1.
+*WRITE: / 'Total Order Quantity:', total_order_quantity,
+*               / 'Total Net Value:', total_net_value.
+*
+*
+*    total_order_quantity = 0.
+*    total_net_value = 0.
+*ENDIF.
+wa_vbap_temp = wa_vbap.
+  AT NEW vbeln.
+    READ TABLE it_vbak INTO wa_vbak WITH  KEY vbeln = wa_vbap-vbeln.
+    READ TABLE it_kna1 INTO wa_kna1 WITH KEY kunnr = wa_vbak-kunnr.
+
+    WRITE : / 'Document Number:',wa_vbak-vbeln,
+            / 'Doc Date:',wa_vbak-audat,
+            / 'Net Val:',wa_vbak-netwr,
+            / 'Sold To Party:',wa_kna1-name1,
+            / 'ItemDesc:',wa_vbap_temp-arktx.
+*    ENDIF.
+*   WRITE : / wa_vbap_temp-posnr.
+
+    WRITE :/ 'Item',
+       20 'Material',
+       35 'ItemDesc',
+       60 'Order quantity' ,
+       80 'Unit of measure',
+       100 'NetValue'.
+
+  ENDAT.
+
+  READ TABLE it_t006a INTO wa_t006a WITH KEY msehi = wa_vbap-zieme.
+
+  WRITE : / wa_vbap-posnr,
+
+           20 wa_vbap-pstyv,
+           35 wa_vbap-arktx,
+           50 wa_vbap-kwmeng,
+           80 wa_t006a-msehl,
+           90 wa_vbap-netwr.
+
+*   total_order_quantity = total_order_quantity + wa_vbap-kwmeng.
+*   total_net_value = total_net_value + wa_vbap-netwr.
+*
+*   pvbeln = wa_vbap-vbeln.
+  AT END OF vbeln.
+    SUM.
+    WRITE : /50 wa_vbap-kwmeng, 90 wa_vbap-netwr.
+  ENDAT.
+
+ENDLOOP.
+
+*  WRITE: / 'Total Order Quantity:', total_order_quantity,
+*        / 'Total Net Value:', total_net_value.

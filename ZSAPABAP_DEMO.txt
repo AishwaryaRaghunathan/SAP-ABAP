@@ -1,0 +1,45 @@
+*&---------------------------------------------------------------------*
+*& Report ZSAPABAP_DEMO
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSAPABAP_DEMO.
+DATA v_name TYPE c LENGTH 10.
+v_name = 'aishu.50'.
+WRITE:/ v_name.
+
+DATA num TYPE n LENGTH 10.
+num = '1344523345578'.
+WRITE:/ num.
+
+DATA date TYPE d.
+date = '20231014'.
+WRITE:/ date.
+
+DATA time TYPE t.
+time = '065521'.
+WRITE:/ time.
+
+DATA qty TYPE p LENGTH 10 DECIMALS 5.
+qty = '134215.65'.
+WRITE:/ qty.
+
+DATA float TYPE F.
+float = '234'.
+WRITE:/ float.
+
+DATA int TYPE I.
+int = '23489'.
+WRITE:/ int.
+
+DATA dec TYPE Decfloat16.
+dec = '23489.3456782345678'.
+WRITE:/ dec.
+
+DATA hex TYPE X LENGTH 5.
+hex = '52346964215679'.
+WRITE:/ hex.
+
+DATA string TYPE string.
+string = 'aishwarya'.
+WRITE:/ string.

@@ -1,0 +1,26 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_STRUCTURE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_STRUCTURE.
+
+DATA v_matnr TYPE makt-matnr.
+
+DATA : BEGIN OF st_makt,
+       matnr TYPE makt-matnr,
+       spras TYPE makt-matnr,
+       maktx TYPE makt-maktx,
+  END OF st_makt.
+
+  v_matnr = '234'.
+  WRITE v_matnr.
+
+  v_matnr = '445'.
+  WRITE v_matnr.
+
+  st_makt-matnr = '945'.
+  WRITE st_makt-matnr.
+
+  st_makt-matnr = '12345'.
+  WRITE st_makt-matnr.

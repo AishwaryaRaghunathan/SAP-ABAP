@@ -1,0 +1,41 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_INTERNALTABLESYNTAX
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_INTERNALTABLESYNTAX.
+
+TYPES: BEGIN OF ty_makt,
+  matnr TYPE makt-matnr,
+  spras TYPE makt-spras,
+  maktx TYPE makt-maktx,
+  END OF ty_makt.
+
+  DATA:it_makt TYPE TABLE OF ty_makt,
+  wa_makt LIKE LINE OF it_makt.
+
+  wa_makt-matnr = '200'.
+  wa_makt-spras = 'E' .
+  wa_makt-maktx = 'Picture'.
+  APPEND wa_makt TO it_makt.
+
+  wa_makt-matnr = '200'.
+  wa_makt-spras = 'D' .
+  wa_makt-maktx = 'Pen'.
+  APPEND wa_makt TO it_makt.
+
+  wa_makt-matnr = '100'.
+  wa_makt-spras = 'EN' .
+  wa_makt-maktx = 'Material'.
+  APPEND wa_makt TO it_makt.
+
+  CLEAR wa_makt.
+
+  READ TABLE it_makt INTO wa_makt INDEX 2.
+  READ TABLE it_makt INTO wa_makt WITH KEY matnr = '200' spras = 'D'.
+
+  LOOP AT it_makt INTO wa_makt FROM 1 to 3.
+
+    WRITE :/ wa_makt.
+
+    ENDLOOP.

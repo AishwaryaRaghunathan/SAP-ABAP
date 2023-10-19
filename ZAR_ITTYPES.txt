@@ -1,0 +1,74 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ITTYPES
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_ITTYPES.
+
+*TYPES : BEGIN OF ty_makt,
+*         matnr TYPE makt-matnr,
+*         spras TYPE makt-spras,
+*         maktx TYPE makt-maktx,
+*      END OF ty_makt.
+*
+*DATA : it_makt TYPE STANDARD TABLE OF ty_makt,
+*       wa_makt LIKE LINE OF it_makt.
+*
+*   wa_makt-matnr = '100'.
+*   wa_makt-spras = 'E'.
+*   wa_makt-maktx = 'Book'.
+*   APPEND wa_makt to it_makt.
+*
+*   wa_makt-matnr = '300'.
+*   wa_makt-spras = 'E'.
+*   wa_makt-maktx = 'Book'.
+*   APPEND wa_makt to it_makt.
+*
+*   wa_makt-matnr = '200'.
+*   wa_makt-spras = 'E'.
+*   wa_makt-maktx = 'Book'.
+*   APPEND wa_makt to it_makt.
+*
+*   wa_makt-matnr = '100'.
+*   wa_makt-spras = 'E'.
+*   wa_makt-maktx = 'Book'.
+*   APPEND wa_makt to it_makt.
+*
+*Write: / wa_makt.
+
+TYPES : BEGIN OF ty_makt,
+         matnr TYPE makt-matnr,
+         spras TYPE makt-spras,
+         maktx TYPE makt-maktx,
+      END OF ty_makt.
+
+DATA : it_makt TYPE SORTED TABLE OF ty_makt with UNIQUE KEY matnr spras,
+       wa_makt LIKE LINE OF it_makt.
+
+   wa_makt-matnr = '100'.
+   wa_makt-spras = 'E'.
+   wa_makt-maktx = 'Book'.
+   INSERT wa_makt INto TABLE it_makt.
+
+   wa_makt-matnr = '300'.
+   wa_makt-spras = 'E'.
+   wa_makt-maktx = 'Book'.
+   INSERT wa_makt INto TABLE it_makt.
+
+   wa_makt-matnr = '200'.
+   wa_makt-spras = 'E'.
+   wa_makt-maktx = 'Book'.
+   INSERT wa_makt INto TABLE it_makt.
+
+   wa_makt-matnr = '100'.
+   wa_makt-spras = 'D'.
+   wa_makt-maktx = 'Book'.
+   INSERT wa_makt INto TABLE it_makt.
+
+*   sort it_makt by matnr spras.
+   Loop AT it_makt INTO wa_makt From 1 to 5.
+*   READ TABLE it_makt INTO wa_makt WITH TABLE KEY matnr = '100' spras = 'E'.
+
+WRITE: / wa_makt.
+
+ENDLOOP.

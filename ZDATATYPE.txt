@@ -1,0 +1,16 @@
+*&---------------------------------------------------------------------*
+*& Report ZDATATYPE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZDATATYPE.
+*TYPES ty_name TYPE ZDATAELEMENT .
+DATA: v_name TYPE ZDATAELEMENT,
+      v_f_name TYPE ZDATAELEMENT,
+      v_m_name TYPE ZDATAELEMENT.
+v_name = 'aishwarya'.
+v_f_name = 'raghu'.
+v_m_name = 'usha'.
+WRITE:/ 'name is: ' ,v_name.
+WRITE:/ 'name is: ' ,v_f_name.
+WRITE:/ 'name is: ' ,v_m_name.

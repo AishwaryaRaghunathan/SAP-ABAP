@@ -1,0 +1,24 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_MULTIPLEROWS
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_MULTIPLEROWS.
+
+DATA v_matnr TYPE makt-matnr.
+
+TYPES : BEGIN OF ty_makt,
+       matnr TYPE makt-matnr,
+       spras TYPE makt-spras,
+       maktx TYPE makt-maktx,
+  END OF ty_makt.
+
+ DATA st_makt TYPE ty_makt.
+
+ st_makt-matnr = 'aishwarya'.
+  st_makt-spras = 'EN'.
+  st_makt-maktx = 'mysore'.
+
+  WRITE st_makt-matnr.
+  WRITE st_makt-spras.
+  WRITE st_makt-maktx.
