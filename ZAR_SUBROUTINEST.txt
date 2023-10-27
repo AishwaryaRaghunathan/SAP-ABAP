@@ -1,0 +1,43 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_SUBROUTINEST
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_SUBROUTINEST.
+
+TYPES : BEGIN OF ty_makt,
+         matnr TYPE makt-matnr,
+         spras TYPE makt-spras,
+         maktx TYPE makt-maktx,
+        END OF ty_makt.
+
+DATA : st_makt TYPE ty_makt.
+
+DATA : v_matnr type makt-matnr,
+       v_spras TYPE makt-spras,
+       v_maktx TYPE makt-maktx.
+
+v_matnr = '000000000000000056'.
+v_spras = 'E'.
+
+PERFORM get_data4 USING v_matnr v_spras CHANGING v_maktx st_makt .
+write v_maktx.
+*&---------------------------------------------------------------------*
+*& Form get_data4
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM get_data4 USING VALUE(p_v_matnr) TYPE makt-matnr
+                    VALUE(p_v_spras) TYPE makt-spras
+              CHANGING VALUE(p_v_maktx) TYPE makt-maktx
+                         p_st_makt TYPE ty_makt.
+
+select single maktx from makt into p_v_maktx where matnr eq p_v_matnr and spras eq p_v_spras.
+  select single matnr spras maktx from makt into p_st_makt WHERE matnr eq p_v_matnr.
+
+    WRITE p_st_makt-matnr.
+  p_v_spras = 'D'.
+ENDFORM.

@@ -1,0 +1,45 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_SUBROUTINEPV
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_SUBROUTINEPV.
+
+DATA: v_matnr TYPE makt-matnr,
+      v_spras TYPE makt-spras,
+      v_maktx TYPE makt-maktx.
+
+v_matnr = '000000000000000056'.
+v_spras = 'E'.
+
+PERFORM get_data USING v_matnr v_spras CHANGING v_maktx.
+write v_maktx.
+
+*&---------------------------------------------------------------------*
+*& Form get_data
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*&      --> V_MATNR
+*&      --> V_SPRAS
+*&      <-- V_MAKTX
+*&---------------------------------------------------------------------*
+
+*Pass by value and result
+FORM get_data  USING VALUE(p_v_matnr) TYPE makt-matnr
+                 VALUE(p_v_spras) TYPE makt-spras
+                VALUE(p_v_maktx) TYPE makt-maktx.
+
+  select single maktx from makt into p_v_maktx where matnr EQ p_v_matnr and spras EQ p_v_spras.
+ p_v_spras = 'D'.
+
+
+*FORM get_data1  USING VALUE(p_v_matnr) TYPE makt-matnr
+*                 VALUE(p_v_spras) TYPE makt-spras
+*                CHANGING p_v_maktx TYPE makt-maktx.
+*
+*  select single maktx from makt into p_v_maktx where matnr EQ p_v_matnr and spras EQ p_v_spras.
+* p_v_spras = 'D'.
+
+
+ENDFORM.

@@ -1,0 +1,76 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_MESSAGE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_MESSAGE .
+*REPORT ZAR_MESSAGE MESSAGE-ID Z_Message.
+
+Data :it_makt TYPE STANDARD TABLE OF makt,
+       wa_makt LIKE LINE OF it_makt.
+
+PARAMETERS p_matnr TYPE makt-matnr.
+
+AT SELECTION-SCREEN.
+
+SELECT * FROM makt INTO TABLE it_makt WHERE matnr EQ p_matnr.
+
+IF sy-subrc IS NOT INITIAL.
+
+*  MESSAGE 'Please enter the valid material number' TYPE 'E'.
+ MESSAGE e000(Z_MESSAGE) with p_matnr.
+*  MESSAGE text-000 TYPE 'E'. "I - Information, W - Warning, E- Error, S - Status, A - Abandon, X - Short dump
+ENDIF.
+
+START-OF-SELECTION.
+
+LOOP AT it_makt into wa_makt.
+WRITE : / wa_makt-matnr, wa_makt-spras, wa_makt-maktx.
+ENDLOOP.
+
+*REPORT ZAR_MESSAGE .
+*
+*DATA: it_makt TYPE STANDARD TABLE OF makt,
+*      wa_makt LIKE LINE OF it_makt,
+*      message_text TYPE string.
+*
+*PARAMETERS p_matnr TYPE makt-matnr.
+*
+*AT SELECTION-SCREEN.
+*
+*SELECT * FROM makt INTO TABLE it_makt WHERE matnr EQ p_matnr.
+*
+*IF sy-subrc IS NOT INITIAL.
+**  MESSAGE e000(Z_Message).
+*  message_text = 'You have entered invalid material number please enter valid number: ' && p_matnr.
+*  MESSAGE message_text TYPE 'E' DISPLAY LIKE 'E'.
+*ENDIF.
+*
+*START-OF-SELECTION.
+*
+*LOOP AT it_makt INTO wa_makt.
+*  WRITE: / wa_makt-matnr, wa_makt-spras, wa_makt-maktx.
+*ENDLOOP.
+
+*REPORT ZAR_MESSAGE .
+*
+*DATA: it_makt TYPE STANDARD TABLE OF makt,
+*      wa_makt LIKE LINE OF it_makt.
+*
+*PARAMETERS p_matnr TYPE makt-matnr.
+*
+*AT SELECTION-SCREEN.
+*
+*SELECT * FROM makt INTO TABLE it_makt WHERE matnr EQ p_matnr.
+*
+*IF sy-subrc IS NOT INITIAL.
+*  MESSAGE ID 'Z_MESSAGE' TYPE 'E' NUMBER '001' WITH p_matnr.
+**  MESSAGE E000 WITH p_matnr.
+*  EXIT.
+*ENDIF.
+*
+*START-OF-SELECTION.
+*
+*LOOP AT it_makt INTO wa_makt.
+*  WRITE: / wa_makt-matnr, wa_makt-spras, wa_makt-maktx.
+*ENDLOOP.

@@ -1,0 +1,29 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_PROCESSINGBLOCKS
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_PROCESSINGBLOCKS.
+
+PARAMETERS : p_matnr type matnr,
+             num type i.
+
+LOAD-OF-PROGRAM.
+write : / 'Load of Program Triggered'.
+INITIALIZATION.
+num = 10.
+write : / 'Initialization'.
+START-OF-SELECTION.
+write : / 'Start of Selection'.
+END-OF-SELECTION.
+write : / 'End of Selection'.
+AT SELECTION-SCREEN.
+write : / 'At Selection Screen'.
+AT SELECTION-SCREEN OUTPUT.
+write : / 'At Selection Screen Output'.
+TOP-OF-PAGE.
+write : / 'Header'.
+END-OF-PAGE.
+write : / 'Footer'.
+AT LINE-SELECTION.
+  write : / 'At Line Selection'.
