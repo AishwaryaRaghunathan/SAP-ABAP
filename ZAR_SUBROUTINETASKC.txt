@@ -1,0 +1,74 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_SUBROUTINETASKC
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_SUBROUTINETASKC.
+
+TYPES : BEGIN OF ty_range,
+          sign TYPE  c LENGTH 1,
+          opti TYPE c LENGTH 2,
+          low  TYPE vbeln,
+          high TYPE vbeln,
+        END OF ty_range.
+
+
+TYPES: ty_it_range TYPE STANDARD TABLE OF ty_range.
+*  DATA   p_s_num TYPE vbak-vbeln.
+FORM display  USING p_s_num TYPE ty_it_range
+            CHANGING p_it_header TYPE zar_t_header.
+
+
+
+  DATA : it_vbak TYPE STANDARD TABLE OF zar_s_vbak,
+         wa_vbak LIKE LINE OF it_vbak,
+         it_kna1 TYPE STANDARD TABLE OF zar_s_kna1,
+         wa_kna1 LIKE LINE OF it_kna1.
+
+  DATA : wa_header LIKE LINE OF p_it_header.
+
+*SELECT * FROM zs1_header INTO TABLE  it_header WHERE vbeln IN p_s_num.
+  SELECT  vbeln audat netwr kunnr FROM vbak INTO TABLE it_vbak WHERE vbeln IN p_s_num.
+  SELECT kunnr name1 FROM kna1 INTO TABLE it_kna1 FOR ALL ENTRIES IN it_vbak WHERE kunnr EQ it_vbak-kunnr.
+  LOOP AT it_vbak INTO wa_vbak.
+    READ TABLE it_kna1 INTO wa_kna1 WITH KEY kunnr = wa_vbak-kunnr.
+
+
+    wa_header-vbeln = wa_vbak-vbeln.
+    wa_header-audat = wa_vbak-audat.
+    wa_header-netwr = wa_vbak-netwr.
+    wa_header-name1 =  wa_kna1-name1.
+    APPEND wa_header TO p_it_header.
+
+  ENDLOOP.
+
+ENDFORM.
+
+FORM itemdetails  USING v_vbeln TYPE vbap-vbeln
+            CHANGING p_it_item TYPE zar_t_item.
+
+  DATA: it_vbap  TYPE STANDARD TABLE OF zar_s_vbap,
+        wa_vbap  LIKE LINE OF it_vbap,
+        it_t006a TYPE STANDARD TABLE OF zar_s_t006a,
+        wa_t006a LIKE LINE OF it_t006a.
+  DATA wa_item LIKE LINE OF p_it_item.
+  data prevbeln TYPE vbap-vbeln.
+  SELECT  vbeln posnr pstyv arktx kwmeng zieme netwr FROM vbap INTO TABLE it_vbap WHERE vbeln EQ v_vbeln.
+  SELECT msehi msehl FROM t006a INTO TABLE it_t006a FOR ALL ENTRIES IN it_vbap WHERE spras EQ sy-langu AND msehi EQ it_vbap-zieme.
+  LOOP AT it_vbap INTO wa_vbap.
+
+    READ TABLE it_t006a INTO wa_t006a WITH KEY msehi = wa_vbap-zieme.
+    MOVE-CORRESPONDING wa_vbap TO wa_item.
+    MOVE-CORRESPONDING wa_t006a TO wa_item.
+*    wa_item-vbeln = wa_vbap-vbeln.
+*    wa_item-posnr = wa_vbap-posnr.
+*    wa_item-pstyv = wa_vbap-pstyv.
+*    wa_item-arktx = wa_vbap-arktx.
+*    wa_item-kwmeng = wa_vbap-kwmeng.
+*    wa_item-zieme = wa_vbap-zieme.
+*    wa_item-netwr = wa_vbap-netwr.
+*    wa_t006a-msehl = wa_t006a-msehl.
+    APPEND wa_item TO p_it_item.
+
+ENDLOOP.
+ENDFORM.

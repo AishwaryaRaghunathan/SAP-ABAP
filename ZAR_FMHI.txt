@@ -1,0 +1,53 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_FMHI
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_FMHI.
+
+DATA: it_header TYPE STANDARD TABLE OF ZAR_T_HEADER,
+      wa_header LIKE LINE OF it_header,
+
+     it_item   TYPE STANDARD TABLE OF ZAR_T_ITEM,
+     wa_item LIKE LINE OF it_item.
+
+
+TYPES : BEGIN OF ty_range,
+          sign TYPE  c LENGTH 1,
+          opti TYPE c LENGTH 2,
+          low  TYPE vbeln,
+          high TYPE vbeln,
+        END OF ty_range.
+
+
+TYPES: ty_it_range TYPE STANDARD TABLE OF ty_range.
+
+SELECT-OPTIONS s_num FOR wa_header-vbeln.
+
+
+LOOP AT it_header INTO wa_header.
+    CLEAR wa_item.
+
+  CALL FUNCTION 'ZAR_HEADERS'
+    EXPORTING
+      im_vbeln     = s_num
+      EX_HEADER    = wa_header
+      EX_ITEM      = wa_item
+
+    EXCEPTIONS
+      INVALID_DOCUMENT_NUMBER = 1
+      OTHERS                  = 2.
+
+  IF sy-subrc <> 0.
+* Implement suitable error handling here
+    CASE  SY-SUBRC.
+
+      WHEN 1.
+      MESSAGE 'INVALID DOCUMENT NUMBER' TYPE 'E'.
+      WHEN OTHERS.
+    ENDCASE.
+  ENDIF.
+
+ CALL FUNCTION 'ZAR_HEADERSW'
+           .
+  ENDLOOP.
