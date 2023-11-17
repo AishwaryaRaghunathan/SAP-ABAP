@@ -1,0 +1,29 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_TASK1
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_TASK1.
+
+TYPES:BEGIN OF st_MAKT,
+      MATNR TYPE MAKT-matnr,
+      SPRAS TYPE MAKT-SPRAS,
+      MAKTX TYPE MAKT-MAKTX,
+  END OF st_MAKT.
+
+  DATA: st_makt TYPE makt.
+
+  PARAMETERS :p_matnr type makt-matnr.
+
+
+SELECT matnr spras maktx from makt into st_makt where matnr Eq p_matnr.
+
+Write:/ 'Material number',
+        20'Language',
+        50'Description'.
+
+Write: / st_makt-matnr,
+         20 st_makt-spras,
+         50 st_makt-maktx.
+
+ENDSELECT.

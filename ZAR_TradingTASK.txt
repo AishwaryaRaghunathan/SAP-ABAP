@@ -1,0 +1,108 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_TTASK
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_TTASK.
+
+
+TYPES : BEGIN OF ty_file,
+          date  TYPE d,
+          price TYPE p DECIMALS 2,
+          open  TYPE p DECIMALS 2,
+          high  TYPE p DECIMALS 2,
+          low   TYPE p DECIMALS 2,
+        END OF ty_file.
+
+DATA : it_file        TYPE TABLE OF ty_file,
+       wa_file        LIKE LINE OF it_file,
+       it_raw         TYPE truxs_t_text_data,
+       d_total_trade  TYPE i VALUE 0,
+       d_prev         TYPE p DECIMALS 2,
+       d_total_long   TYPE i VALUE 0,
+       d_total_short  TYPE i VALUE 0,
+       d_profit       TYPE p DECIMALS 2,
+       profit_count TYPE i VALUE 0,
+       loss_count   TYPE  i VALUE 0.
+
+PARAMETERS: p_file   TYPE localfile,
+            p_amount TYPE p DECIMALS 2.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_file.
+  CALL FUNCTION 'F4_FILENAME'
+    EXPORTING
+      program_name  = syst-cprog
+      dynpro_number = syst-dynnr
+      field_name    = 'p_file'
+    IMPORTING
+      file_name     = p_file.
+
+START-OF-SELECTION.
+
+  CALL FUNCTION 'TEXT_CONVERT_XLS_TO_SAP'
+    EXPORTING
+*     I_FIELD_SEPERATOR    =
+      i_line_header        = abap_true
+      i_tab_raw_data       = it_raw
+      i_filename           = p_file
+*     I_STEP               = 1
+    TABLES
+      i_tab_converted_data = it_file
+    EXCEPTIONS
+      conversion_failed    = 1
+      OTHERS               = 2.
+  IF sy-subrc <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+  LOOP AT it_file INTO wa_file FROM 2.
+    IF sy-tabix = 1.
+      d_prev = wa_file-price.
+      CONTINUE.
+    ENDIF.
+
+    IF wa_file-open > d_prev.
+      d_total_long = d_total_long + 1.
+      IF wa_file-high >  ( 102 / 100 ) * wa_file-open.
+        d_profit = d_profit + ( 2 / 100 * wa_file-open ).
+        ADD 1 TO profit_count.
+      ELSE.
+        d_profit = d_profit + ( wa_file-price - wa_file-open ).
+        IF ( wa_file-price - wa_file-open ) > 0.
+          ADD 1 TO profit_count.
+        ELSE.
+          ADD 1 TO loss_count.
+        ENDIF.
+      ENDIF.
+    ELSE.
+      IF wa_file-low < ( 98 / 100 * wa_file-open ).
+        d_profit = d_profit + ( 2 / 100 * wa_file-open ).
+        ADD 1 TO profit_count.
+      ELSE.
+        d_profit = d_profit + ( wa_file-price - wa_file-open ).
+        IF ( wa_file-price - wa_file-open ) > 0.
+          ADD 1 TO profit_count.
+        ELSE.
+          ADD 1 TO loss_count.
+        ENDIF.
+      ENDIF.
+      d_total_short = d_total_short + 1.
+    ENDIF.
+*    WRITE : / wa_file-date,
+*             15 wa_file-price,
+*             30 wa_file-open,
+*             50 wa_file-high,
+*             70 wa_file-low.
+
+    d_total_trade = d_total_trade + 1.
+    d_prev = wa_file-price.
+
+  ENDLOOP.
+  DATA : d_total_profit TYPE p DECIMALS 2.
+  d_total_profit = p_amount + d_profit.
+  WRITE :/ 'Total Number of trades :' , d_total_trade,
+         /'Total Number of long positions :',d_total_long,
+         /'Total Number of short positions :',d_total_short,
+         /'Total no:of profit :' ,profit_count,
+         /'Total no: of loss:', loss_count ,
+         /'Toatal profit :' , d_total_profit.

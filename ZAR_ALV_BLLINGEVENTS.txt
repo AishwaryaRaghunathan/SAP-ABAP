@@ -1,0 +1,335 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ALV_BLLINGEVENTS
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_ALV_BLLINGEVENTS.
+
+DATA : it_vbak     TYPE ZAR_T_vbak,
+       wa_vbak     LIKE LINE OF it_vbak,
+       it_kna1     TYPE ZAR_T_kna1,
+       wa_kna1     LIKE LINE OF it_kna1,
+       it_vbap     TYPE ZAR_T_vbap,
+       wa_vbap     LIKE LINE OF it_vbap,
+       it_t006a    TYPE ZAR_T_t006a,
+       wa_t006a    LIKE LINE OF it_t006a,
+       it_header   TYPE ZAR_T_header,
+       wa_header   LIKE LINE OF it_header,
+       it_item     TYPE ZAR_T_item,
+       wa_item     LIKE LINE OF it_item,
+       it_fcat     TYPE slis_t_fieldcat_alv,
+       it_fieldcat TYPE slis_t_fieldcat_alv,
+       v_vbeln     TYPE vbak-vbeln.
+DATA fs_layout type slis_layout_alv.
+fs_layout-zebra = 'X'.
+SELECT-OPTIONS s_num FOR wa_vbak-vbeln.
+
+PARAMETERS:p_fm_alv RADIOBUTTON GROUP rv1,
+           p_oo_alv RADIOBUTTON GROUP rv1.
+
+START-OF-SELECTION.
+  PERFORM get_header_data.
+
+END-OF-SELECTION.
+if p_fm_alv is not INITIAL.
+  PERFORM display_header.
+  else.
+   PERFORM display_p_oo_alv.
+   endif.
+
+*&---------------------------------------------------------------------*
+*& Form get_header_data
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+
+FORM get_header_data .
+  SELECT vbeln audat netwr kunnr FROM vbak INTO TABLE it_vbak WHERE vbeln IN s_num.
+  SELECT kunnr name1 FROM kna1 INTO TABLE it_kna1 FOR ALL ENTRIES IN it_vbak WHERE kunnr EQ it_vbak-kunnr.
+  LOOP AT it_vbak INTO wa_vbak.
+    READ TABLE it_kna1 INTO wa_kna1 WITH KEY kunnr = wa_vbak-kunnr.
+    MOVE-CORRESPONDING wa_vbak TO wa_header.
+    MOVE-CORRESPONDING wa_kna1 TO wa_header.
+    APPEND wa_header TO it_header.
+    CLEAR wa_header.
+  ENDLOOP.
+ENDFORM.
+
+*&---------------------------------------------------------------------*
+*& Form display_header
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+
+FORM display_header .
+  DATA lwa_fieldcat LIKE LINE OF it_fieldcat.
+  lwa_fieldcat-col_pos = 1.
+  lwa_fieldcat-fieldname = 'VBELN'.
+  lwa_fieldcat-tabname = 'IT_HEADER'.
+  lwa_fieldcat-seltext_m = 'Document No.'.
+  lwa_fieldcat-outputlen = 20.
+  APPEND lwa_fieldcat TO it_fieldcat.
+  lwa_fieldcat-col_pos = 2.
+  lwa_fieldcat-fieldname = 'AUDAT'.
+  lwa_fieldcat-tabname = 'IT_HEADER'.
+  lwa_fieldcat-seltext_m = 'Document Date'.
+  lwa_fieldcat-outputlen = 20.
+  APPEND lwa_fieldcat TO it_fieldcat.
+  lwa_fieldcat-col_pos = 3.
+  lwa_fieldcat-fieldname = 'NETWR'.
+  lwa_fieldcat-tabname = 'IT_HEADER'.
+  lwa_fieldcat-seltext_m = 'NetValue'.
+  lwa_fieldcat-outputlen = 20.
+  APPEND lwa_fieldcat TO it_fieldcat.
+  lwa_fieldcat-col_pos = 4.
+  lwa_fieldcat-fieldname = 'NAME1'.
+  lwa_fieldcat-tabname = 'IT_HEADER'.
+  lwa_fieldcat-seltext_m = 'Sold To Party'.
+  lwa_fieldcat-outputlen = 40.
+  APPEND lwa_fieldcat TO it_fieldcat.
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+    EXPORTING
+*     I_INTERFACE_CHECK       = ' '
+*     I_BYPASSING_BUFFER      = ' '
+*     I_BUFFER_ACTIVE         = ' '
+      i_callback_program      = 'ZAR_ALV_BLLINGEVENTS'
+     I_CALLBACK_PF_STATUS_SET  = 'PF_STATUS'
+      i_callback_user_command = 'USER_COMMAND'
+*     I_CALLBACK_TOP_OF_PAGE  = ' '
+*     I_CALLBACK_HTML_TOP_OF_PAGE       = ' '
+*     I_CALLBACK_HTML_END_OF_LIST       = ' '
+*     I_STRUCTURE_NAME        =
+*     I_BACKGROUND_ID         = ' '
+*     I_GRID_TITLE            =
+*     I_GRID_SETTINGS         =
+     IS_LAYOUT               = fs_layout
+      it_fieldcat             = it_fieldcat
+*     IT_EXCLUDING            =
+*     IT_SPECIAL_GROUPS       =
+*     IT_SORT                 =
+*     IT_FILTER               =
+*     IS_SEL_HIDE             =
+*     I_DEFAULT               = 'X'
+*     I_SAVE                  = ' '
+*     IS_VARIANT              =
+*     IT_EVENTS               =
+*     IT_EVENT_EXIT           =
+*     IS_PRINT                =
+*     IS_REPREP_ID            =
+*     I_SCREEN_START_COLUMN   = 0
+*     I_SCREEN_START_LINE     = 0
+*     I_SCREEN_END_COLUMN     = 0
+*     I_SCREEN_END_LINE       = 0
+*     I_HTML_HEIGHT_TOP       = 0
+*     I_HTML_HEIGHT_END       = 0
+*     IT_ALV_GRAPHICS         =
+*     IT_HYPERLINK            =
+*     IT_ADD_FIELDCAT         =
+*     IT_EXCEPT_QINFO         =
+*     IR_SALV_FULLSCREEN_ADAPTER        =
+*     O_PREVIOUS_SRAL_HANDLER =
+* IMPORTING
+*     E_EXIT_CAUSED_BY_CALLER =
+*     ES_EXIT_CAUSED_BY_USER  =
+    TABLES
+      t_outtab                = it_header
+    EXCEPTIONS
+      program_error           = 1
+      OTHERS                  = 2.
+
+ENDFORM.
+FORM user_command USING r_ucomm LIKE sy-ucomm
+                                   rs_selfield TYPE slis_selfield.
+  IF r_ucomm EQ '&IC1' AND rs_selfield-fieldname EQ 'VBELN'.
+
+    CLEAR it_item.
+    SELECT vbeln posnr pstyv arktx kwmeng zieme netwr FROM vbap INTO TABLE it_vbap WHERE vbeln EQ rs_selfield-value.
+    SELECT msehi msehl FROM t006a INTO TABLE it_t006a FOR ALL ENTRIES IN it_vbap WHERE msehi EQ it_vbap-zieme AND spras EQ sy-langu.
+    LOOP AT it_vbap INTO wa_vbap.
+      READ TABLE it_t006a INTO wa_t006a WITH KEY msehi = wa_vbap-zieme.
+      MOVE-CORRESPONDING wa_vbap TO wa_item.
+      MOVE-CORRESPONDING wa_t006a TO wa_item.
+      APPEND wa_item TO it_item.
+      CLEAR wa_item.
+    ENDLOOP.
+
+    CLEAR it_fcat.
+    DATA : lwa_fcat LIKE LINE OF it_fcat.
+    lwa_fcat-col_pos = 1.
+
+    lwa_fcat-fieldname = 'POSNR'.
+    lwa_fcat-tabname = 'IT_ITEM'.
+    lwa_fcat-seltext_m = ' Item No.'.
+    lwa_fcat-outputlen = 20.
+    APPEND lwa_fcat TO it_fcat.
+    lwa_fcat-col_pos = 2.
+    lwa_fcat-fieldname = 'PSTYV'.
+    lwa_fcat-tabname = 'IT_ITEM'.
+    lwa_fcat-seltext_m = 'Material Type'.
+    lwa_fcat-outputlen = 20.
+    APPEND lwa_fcat TO it_fcat.
+    lwa_fcat-col_pos = 3.
+    lwa_fcat-fieldname = 'ARKTX'.
+    lwa_fcat-tabname = 'IT_ITEM'.
+    lwa_fcat-seltext_m = ' Item Description'.
+    lwa_fcat-outputlen = 20.
+    APPEND lwa_fcat TO it_fcat.
+    lwa_fcat-col_pos = 4.
+    lwa_fcat-fieldname = 'KWMENG'.
+    lwa_fcat-tabname = 'IT_ITEM'.
+    lwa_fcat-seltext_m = ' Order Qty'.
+    lwa_fcat-outputlen = 20.
+    APPEND lwa_fcat TO it_fcat.
+    lwa_fcat-col_pos = 5.
+    lwa_fcat-fieldname = 'MSEHL'.
+    lwa_fcat-tabname = 'IT_ITEM'.
+    lwa_fcat-seltext_m = 'UoM'.
+    lwa_fcat-outputlen = 20.
+    APPEND lwa_fcat TO it_fcat.
+    lwa_fcat-col_pos = 6.
+    lwa_fcat-fieldname = 'NETWR'.
+    lwa_fcat-tabname = 'IT_ITEM'.
+    lwa_fcat-seltext_m = ' NetValue'.
+    lwa_fcat-outputlen = 20.
+    APPEND lwa_fcat TO it_fcat.
+
+
+    CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+      EXPORTING
+*       I_INTERFACE_CHECK       = ' '
+*       I_BYPASSING_BUFFER      = ' '
+*       I_BUFFER_ACTIVE         = ' '
+        i_callback_program      = 'ZALV_SALES'
+*       I_CALLBACK_PF_STATUS_SET          = ' '
+        i_callback_user_command = 'USER_COMMAND'
+*       I_CALLBACK_TOP_OF_PAGE  = ' '
+*       I_CALLBACK_HTML_TOP_OF_PAGE       = ' '
+*       I_CALLBACK_HTML_END_OF_LIST       = ' '
+*       I_STRUCTURE_NAME        = ''
+*       I_BACKGROUND_ID         = ' '
+*       I_GRID_TITLE            =
+*       I_GRID_SETTINGS         =
+      IS_LAYOUT               = fs_layout
+        it_fieldcat             = it_fcat
+*       IT_EXCLUDING            =
+*       IT_SPECIAL_GROUPS       =
+*       IT_SORT                 =
+*       IT_FILTER               =
+*       IS_SEL_HIDE             =
+*       I_DEFAULT               = 'X'
+*       I_SAVE                  = ' '
+*       IS_VARIANT              =
+*       IT_EVENTS               =
+*       IT_EVENT_EXIT           =
+*       IS_PRINT                =
+*       IS_REPREP_ID            =
+*       I_SCREEN_START_COLUMN   = 0
+*       I_SCREEN_START_LINE     = 0
+*       I_SCREEN_END_COLUMN     = 0
+*       I_SCREEN_END_LINE       = 0
+*       I_HTML_HEIGHT_TOP       = 0
+*       I_HTML_HEIGHT_END       = 0
+*       IT_ALV_GRAPHICS         =
+*       IT_HYPERLINK            =
+*       IT_ADD_FIELDCAT         =
+*       IT_EXCEPT_QINFO         =
+*       IR_SALV_FULLSCREEN_ADAPTER        =
+*       O_PREVIOUS_SRAL_HANDLER =
+* IMPORTING
+*       E_EXIT_CAUSED_BY_CALLER =
+*       ES_EXIT_CAUSED_BY_USER  =
+      TABLES
+        t_outtab                = it_item
+      EXCEPTIONS
+        program_error           = 1
+        OTHERS                  = 2.
+    IF sy-subrc <> 0.
+* Implement suitable error handling here
+    ENDIF.
+  ENDIF.
+  IF r_ucomm EQ '&IC1' AND rs_selfield-fieldname EQ 'NAME1'.
+
+    DATA lv_kunnr TYPE kna1-kunnr.
+
+*    SELECT SINGLE kunnr FROM kna1 INTO lv_kunnr WHERE name1 = rs_selfield-fieldname.
+        READ TABLE it_kna1 INTO wa_kna1 WITH KEY name1 = rs_selfield-value.
+        SET PARAMETER ID 'KUN' FIELD wa_kna1-kunnr.
+        CALL TRANSACTION 'XD03' AND SKIP FIRST SCREEN.
+  ENDIF.
+ENDFORM.
+
+FORM pf_status using rt_extab TYPE slis_t_extab.
+  SET pf-status 'FULL_PDF'.
+  ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form display_p_oo_alv
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+
+
+CLASS lcl_event_handler DEFINITION.
+
+ PUBLIC SECTION.
+    METHODS enable_doubleclick FOR EVENT double_click OF cl_salv_events_table IMPORTING row column.
+ENDCLASS.
+CLASS lcl_event_handler IMPLEMENTATION.
+  METHOD enable_doubleclick.
+
+READ TABLE it_header into wa_header INDEX row.
+    CLEAR it_item.
+    SELECT vbeln posnr pstyv arktx kwmeng zieme netwr FROM vbap INTO TABLE it_vbap where vbeln eq wa_header-vbeln .
+    SELECT msehi msehl FROM t006a INTO TABLE it_t006a FOR ALL ENTRIES IN it_vbap WHERE msehi EQ it_vbap-zieme AND spras EQ sy-langu.
+    LOOP AT it_vbap INTO wa_vbap.
+      READ TABLE it_t006a INTO wa_t006a WITH KEY msehi = wa_vbap-zieme.
+      MOVE-CORRESPONDING wa_vbap TO wa_item.
+      MOVE-CORRESPONDING wa_t006a TO wa_item.
+      APPEND wa_item TO it_item.
+      CLEAR wa_item.
+      ENDLOOP.
+
+      cl_salv_table=>factory(
+*        EXPORTING
+*          list_display   = if_salv_c_bool_sap=>false " ALV Displayed in List Mode
+*          r_container    =                           " Abstract Container for GUI Controls
+*          container_name =
+        IMPORTING
+          r_salv_table   =  DATA(O_ALV1)                         " Basis Class Simple ALV Tables
+        CHANGING
+          t_table        = it_item
+      ).
+*      CATCH cx_salv_msg. " ALV: General Error Class with Message
+      o_alv1->display( ).
+      ENDMETHOD.
+      ENDCLASS.
+DATA o_event TYPE REF TO lcl_event_handler.
+
+FORM display_p_oo_alv .
+CL_SALV_TABLE=>factory(
+*    EXPORTING
+*      list_display   = if_salv_c_bool_sap=>false " ALV Displayed in List Mode
+*      r_container    =                           " Abstract Container for GUI Controls
+*      container_name =
+    IMPORTING
+     r_salv_table   =  DATA(O_ALV)                         " Basis Class Simple ALV Tables
+    CHANGING
+      t_table        = IT_HEADER
+  ).
+*  CATCH cx_salv_msg. " ALV: General Error Class with Message
+ DATA(o_event_class) = o_alv->get_event( ).
+ create object o_event.
+  SET HANDLER o_event->enable_doubleclick FOR o_event_class.
+O_ALV->display( ).
+*CATCH cx_salv_msg. " ALV: General Error Class with Message
+
+ENDFORM.

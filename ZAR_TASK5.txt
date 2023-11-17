@@ -1,0 +1,67 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_TASK2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_TASK3.
+
+*local data declaration
+TYPES  : BEGIN OF ty_marc,
+         matnr type marc-matnr,
+         werks type marc-werks,
+         END OF ty_marc.
+
+TYPES : BEGIN OF ty_t001w,
+        name1 type t001w-name1,
+        werks type t001w-werks,
+       End of ty_t001w.
+
+*PARAMETERS p_matnr TYPE marc-matnr.
+
+*global data declaration
+*DATA : it_marc TYPE ZT1_MARC,
+*       wa_marc like line of it_marc.
+
+DATA :   it_marc type table of ty_marc,
+         wa_marc like line of it_marc,
+         it_t001w type table of ty_t001w,
+         wa_t001w like line of it_t001w.
+
+*parameters can be declared like this also
+SELECT-OPTIONS s_matnr for wa_marc-matnr.
+
+START-OF-SELECTION.
+
+PERFORM display USING s_matnr[] CHANGING it_marc.
+
+END-OF-SELECTION.
+
+*&---------------------------------------------------------------------*
+*& Form display_table
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+
+FORM display USING p_s_matnr
+             CHANGING p_it_marc.
+
+  SELECT matnr werks FROM MARC INTO TABLE it_marc WHERE matnr IN s_matnr.
+  SELECT name1 werks FROM t001w INTO TABLE it_t001w FOR ALL ENTRIES IN it_marc WHERE werks = it_marc-werks.
+
+  LOOP AT it_marc INTO wa_marc.
+
+  READ TABLE it_t001w INTO wa_t001w with key werks = wa_marc-werks.
+
+  Write:/ 'Material number',
+        20'Plant name',
+        50 'Description'.
+
+  Write :/ wa_marc-matnr,
+            20 wa_marc-werks,
+            50 wa_t001w-name1.
+
+  Endloop.
+ENDFORM.

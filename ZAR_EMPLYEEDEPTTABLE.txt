@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Report ZEMPLYOEETABLE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_EMPLYEEDEPTTABLE.
+
+TYPES: BEGIN OF ty_zar_makt,
+  empid TYPE zar_makt-empid,
+  name TYPE zar_makt-name,
+  ckey TYPE zar_makt-ckey,
+  salary TYPE zar_makt-salary,
+ d_code TYPE zar_makt-d_code,
+
+  END OF ty_zar_makt.
+
+  DATA : st_zar_makt TYPE ty_zar_makt.
+  DATA v_deptdes TYPE Zdep_makt-deptdes.
+
+  PARAMETERS p_empid TYPE zar_makt-empid.
+
+  SELECT SINGLE empid name ckey salary d_code FROM zar_makt INTO st_zar_makt where empid EQ p_empid.
+SELECT SINGLE deptdes FROM Zdep_makt  INTO v_deptdes WHERE d_code EQ st_zar_makt-d_code.
+
+    WRITE: / st_zar_makt-empid,
+          st_zar_makt-name,
+         st_zar_makt-ckey,
+         st_zar_makt-salary,
+         st_zar_makt-d_code,
+         v_deptdes.

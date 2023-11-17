@@ -1,0 +1,173 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ALV_PRG5
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_ALV_PRG5.
+
+CLASS lcl_report DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ty_vbak,
+             vbeln TYPE vbak-vbeln,
+             erdat TYPE erdat,
+             auart TYPE auart,
+             kunnr TYPE kunnr,
+           END OF ty_vbak.
+
+    DATA: t_vbak TYPE STANDARD TABLE OF ty_vbak.
+
+    DATA: o_alv TYPE REF TO cl_salv_table.  "alv refe
+
+    METHODS: get_data,
+      generate_output.
+
+    " defining new methods
+  PRIVATE SECTION.
+    METHODS: set_pf_status CHANGING co_alv TYPE REF TO cl_salv_table.
+    METHODS: set_top_of_page CHANGING co_alv TYPE REF TO cl_salv_table.
+    METHODS: set_end_of_page CHANGING co_alv TYPE REF TO cl_salv_table.
+    "
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA: lo_report TYPE REF TO lcl_report.
+  CREATE OBJECT lo_report.
+
+  lo_report->get_data( ).
+  lo_report->generate_output( ).
+
+CLASS lcl_report IMPLEMENTATION.
+  METHOD get_data.
+    SELECT vbeln erdat auart kunnr INTO TABLE t_vbak FROM vbak UP TO 20 ROWS.
+  ENDMETHOD.
+  METHOD generate_output.
+    DATA: lx_msg TYPE REF TO cx_salv_msg.
+    TRY.
+        cl_salv_table=>factory(
+*            EXPORTING
+*              list_display   = if_salv_c_bool_sap=>false " ALV Displayed in List Mode
+*              r_container    =                           " Abstract Container for GUI Controls
+*              container_name =
+          IMPORTING
+            r_salv_table   =    o_alv                       " Basis Class Simple ALV Tables
+          CHANGING
+            t_table        = t_vbak
+        ).
+      CATCH cx_salv_msg INTO lx_msg. " ALV: General Error Class with Message
+    ENDTRY.
+
+    " calling the new method
+    CALL METHOD set_pf_status CHANGING co_alv = o_alv.
+
+    CALL METHOD me->set_top_of_page CHANGING co_alv = o_alv.
+    CALL METHOD me->set_end_of_page CHANGING co_alv = o_alv.
+    "
+
+    o_alv->display( ).
+
+  ENDMETHOD.
+
+  " implementing the new methods
+  " calling method to set the pf status
+  METHOD set_pf_status.
+    DATA: lo_functions TYPE REF TO cl_salv_functions_list.
+    lo_functions = co_alv->get_functions( ).
+    lo_functions->set_default( abap_true ).
+  ENDMETHOD.
+
+  "set layout
+  METHOD set_top_of_page.
+    DATA: lo_header  TYPE REF TO cl_salv_form_layout_grid,
+          lo_h_label TYPE  REF TO cl_salv_form_label,
+          lo_h_flow  TYPE REF TO cl_salv_form_layout_flow.
+    CREATE OBJECT lo_header.
+
+    lo_h_label = lo_header->create_label(
+                   row         =  1                " Natural Number
+                   column      =  1                " Natural Number
+*                   rowspan     =
+*                   colspan     =
+*                   text        =
+*                   tooltip     =
+*                   r_label_for =                  " Text
+                 ).
+    lo_h_label->set_text( 'Hedear in bold'  ). "info in bold
+
+    lo_h_flow = lo_header->create_flow(
+                  row     =     2             " Natural Number
+                  column  =     1             " Natural Number
+*                  rowspan =
+*                  colspan =
+                ).
+    lo_h_flow->create_text( text = 'this is text of flow' ).  "info in tabular form
+
+    lo_h_flow = lo_header->create_flow(
+                  row     =     3            " Natural Number
+                  column  =     1             " Natural Number
+*                  rowspan =
+*                  colspan =
+                ).
+    lo_h_flow->create_text( text = 'number of records in the output' ).
+
+    lo_h_flow = lo_header->create_flow(
+                  row     =     3            " Natural Number
+                  column  =     2            " Natural Number
+*                  rowspan =
+*                  colspan =
+                ).
+    lo_h_flow->create_text( text = 20 ).
+
+    co_alv->set_top_of_list( lo_header  ).
+    co_alv->set_top_of_list_print( lo_header  ).
+
+  ENDMETHOD.
+
+  METHOD set_end_of_page.
+    DATA: lo_footer  TYPE REF TO cl_salv_form_layout_grid,
+          lo_f_label TYPE  REF TO cl_salv_form_label,
+          lo_f_flow  TYPE REF TO cl_salv_form_layout_flow.
+    CREATE OBJECT lo_footer.
+
+    lo_f_label = lo_footer->create_label(
+                   row         =  1                " Natural Number
+                   column      =  1                " Natural Number
+*                   rowspan     =
+*                   colspan     =
+*                   text        =
+*                   tooltip     =
+*                   r_label_for =                  " Text
+                 ).
+    lo_f_label->set_text( 'footer...here it goes'  ). "info in bold
+
+    lo_f_flow = lo_footer->create_flow(
+                  row     =     2             " Natural Number
+                  column  =     1             " Natural Number
+*                  rowspan =
+*                  colspan =
+                ).
+    lo_f_flow->create_text( text = 'this is text of flow in footer' ).  "info in tabular form
+
+    lo_f_flow = lo_footer->create_flow(
+                  row     =     3            " Natural Number
+                  column  =     1             " Natural Number
+*                  rowspan =
+*                  colspan =
+                ).
+    lo_f_flow->create_text( text = 'footer number.' ).
+
+    lo_f_flow = lo_footer->create_flow(
+                  row     =     3            " Natural Number
+                  column  =     2            " Natural Number
+*                  rowspan =
+*                  colspan =
+                ).
+    lo_f_flow->create_text( text = 1 ).
+
+    co_alv->set_end_of_list( lo_footer  ).
+    co_alv->set_end_of_list_print( lo_footer  ).
+
+  ENDMETHOD.
+  "
+
+ENDCLASS.

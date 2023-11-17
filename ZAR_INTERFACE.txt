@@ -1,0 +1,16 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_INTERFACE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_INTERFACE.
+
+data : o_bus TYPE REF TO ZCL_AR_BUS.
+DATA o_truck TYPE REF TO ZCL_AR_truck.
+DATA o_acc TYPE REF TO ZCL_AR_ACCOUNT.
+CREATE OBJECT : o_acc, o_bus, o_truck.
+
+o_acc->calculate_fuel_cost( ovehicle = o_truck ).
+o_acc->calculate_fuel_cost( ovehicle = o_bus ).
+
+write 'end'.

@@ -1,0 +1,39 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ALV_CLASS
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_ALV_CLASS.
+
+CLASS lcl_event_handler DEFINITION.
+  PUBLIC SECTION.
+  METHODS catch_doubleclick FOR EVENT double_click OF CL_SALV_EVENTS_TABLE IMPORTING row column.
+ENDCLASS.
+CLASS lcl_event_handler IMPLEMENTATION.
+  METHOD catch_doubleclick.
+    CALL TRANSACTION 'MM03'.
+  ENDMETHOD.
+ENDCLASS.
+DATA : it_makt TYPE STANDARD TABLE OF makt.
+*DATA o_alv TYPE REF TO cl_salv_table.
+DATA o_event TYPE REF TO lcl_event_handler.
+START-OF-SELECTION.
+SELECT * FROM makt INTO TABLE it_makt.
+
+cl_salv_table=>factory(
+*  EXPORTING
+*    list_display   = if_salv_c_bool_sap=>false " ALV Displayed in List Mode
+*    r_container    =                           " Abstract Container for GUI Controls
+*    container_name =
+  IMPORTING
+    r_salv_table   =     DATA(o_alv)                      " Basis Class Simple ALV Tables
+  CHANGING
+    t_table        =  it_makt
+).
+*CATCH cx_salv_msg. " ALV: General Error Class with Message
+CREATE OBJECT o_event.
+
+*DATA o_event_class TYPE REF TO CL_SALV_EVENTS_TABLE.
+DATA(o_event_class) = o_alv->get_event( ).
+SET HANDLER o_event->catch_doubleclick FOR o_event_class.
+  o_alv->display( ).

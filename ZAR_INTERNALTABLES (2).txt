@@ -1,0 +1,71 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_INTERNALTABLES
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_INTERNALTABLES.
+
+PARAMETERS  p_vbeln TYPE vbak-vbeln.
+
+TYPES : BEGIN OF ty_vbak,
+        vbeln TYPE vbak-vbeln,
+        audat TYPE vbak-audat,
+        netwr TYPE vbak-netwr,
+        kunnr TYPE vbak-kunnr,
+        END OF ty_vbak.
+
+TYPES : BEGIN OF ty_vbap,
+         posnr TYPE vbap-posnr,
+         matnr TYPE vbap-matnr,
+         arktx TYPE vbap-arktx,
+         kwmeng TYPE vbap-kwmeng,
+         zieme TYPE vbap-zieme,
+         netwr TYPE vbap-netwr,
+         END OF ty_vbap.
+
+   DATA : it_vbak TYPE TABLE OF ty_vbak,
+          wa_vbak LIKE LINE OF it_vbak,
+          it_vbap TYPE TABLE OF ty_vbap,
+          wa_vbap LIKE LINE OF it_vbap.
+
+    DATA v_name1 TYPE kna1-name1.
+    DATA v_msehl TYPE t006a-msehl.
+
+wa_vbak-vbeln = '34'.
+wa_vbak-audat = '10132023'.
+wa_vbak-netwr = '234789'.
+wa_vbak-kunnr = 'kilogram'.
+APPEND wa_vbak TO it_vbak.
+
+wa_vbap-posnr = '12'.
+wa_vbap-matnr = '24'.
+wa_vbap-arktx = 'material'.
+wa_vbap-kwmeng ='56'.
+wa_vbap-zieme = 'KG'.
+wa_vbap-netwr = '50000'.
+APPEND wa_vbap TO it_vbap.
+
+   SELECT  vbeln audat netwr kunnr FROM vbak INTO TABLE it_vbak WHERE vbeln EQ p_vbeln.
+   SELECT SINGLE name1 FROM kna1 INTO v_name1 WHERE kunnr EQ wa_vbak-kunnr.
+   SELECT posnr matnr arktx kwmeng zieme netwr FROM vbap INTO TABLE it_vbap WHERE vbeln EQ p_vbeln.
+   SELECT SINGLE msehl FROM t006a INTO v_msehl WHERE spras EQ sy-langu AND msehi EQ wa_vbap-zieme.
+
+   WRITE : / 'Document number: ',wa_vbak-vbeln,
+           / 'Document date:',wa_vbak-audat,
+           / 'Net value:',wa_vbak-netwr,
+           / ' sold to vlaue: ', wa_vbak-kunnr.
+
+
+   WRITE :/ 'Item',
+         20 'Material' ,
+         35 'Item Description' ,
+         60 'Order Quantity' ,
+         80 'Unit of measure' ,
+         100 'NetValue' .
+
+   WRITE :/ wa_vbap-posnr,
+            20 wa_vbap-matnr,
+            35 wa_vbap-arktx,
+            50 wa_vbap-kwmeng,
+            80 wa_vbap-zieme,
+            90 wa_vbap-netwr.

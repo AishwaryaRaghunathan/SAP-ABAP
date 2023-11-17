@@ -8,12 +8,17 @@ REPORT ZAR_DATAVIEWS.
 DATA : it_plant TYPE STANDARD TABLE OF ZAR_DATAVIEW,
        wa_plant LIKE LINE OF it_plant.
 
-
 SELECT-OPTIONS s_matnr FOR wa_plant-matnr.
-
 SELECT * FROM ZAR_DATAVIEW INTO TABLE it_plant WHERE matnr IN s_matnr.
 
-  LOOP AT it_plant INTO wa_plant.
-  WRITE : / wa_plant-matnr, 40 wa_plant-werks , 100 wa_plant-name1.
+LOOP AT it_plant INTO wa_plant.
+*IF wa_plant-werks EQ 'JK77'.
+*FORMAT COLOR COL_POSITIVE.
+*
+*ENDIF.
 
-    ENDLOOP.
+WRITE : / wa_plant-matnr, 40 wa_plant-werks , 100 wa_plant-name1.
+
+*FORMAT COLOR OFF.
+
+ENDLOOP.

@@ -1,0 +1,15 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_EVENTS
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_EVENTS.
+
+DATA O_EMP TYPE REF TO ZCL_AR_EVENTS.
+DATA O_EVENT TYPE REF TO ZCL_AR_EVENTF.
+
+CREATE OBJECT O_EMP.
+CREATE OBJECT O_EVENT.
+
+SET HANDLER O_EVENT->emp_name FOR O_EMP.
+O_EMP->double_click( ).

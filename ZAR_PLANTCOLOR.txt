@@ -1,0 +1,39 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_PLANTCOLOR
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_PLANTCOLOR.
+
+TYPES : BEGIN OF ty_range,
+       sign TYPE  c length 1,
+       opti type c length 2,
+  low type werks_d,
+  high type werks_d,
+  END OF ty_range.
+
+
+DATA : it_marc TYPE STANDARD TABLE OF  zkir_view1 ,
+       wa_marc LIKE LINE OF it_marc.
+DATA : it_plant type STANDARD TABLE OF zpp_plant,
+      wa_plant LIKE LINE OF it_plant.
+DATA: prev_low TYPE zneethu_plant-low,
+      prev_high TYPE zneethu_plant-high.
+DATA: it_range type table of ty_range.
+
+SELECT-OPTIONS S_NUM FOR wa_marc-matnr.
+
+SELECT * FROM zkir_view1 INTO TABLE  it_marc WHERE matnr IN s_num.
+SELECT sign opti low high from zpp_plant into table it_range where name eq 'CHECK_PLAN'.
+
+  LOOP AT it_marc INTO wa_marc.
+
+IF wa_marc-werks IN it_range.
+  FORMAT COLOR COL_POSITIVE.
+  ENDIF.
+ WRITE : / wa_marc-matnr,
+              wa_marc-werks,
+              wa_marc-name1.
+
+    FORMAT COLOR OFF.
+ENDLOOP.

@@ -1,0 +1,70 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ALV_PRG3
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+
+REPORT ZAR_ALV_PRG3.
+
+class lcl_report DEFINITION.
+  PUBLIC SECTION.
+     TYPES : BEGIN OF ty_vbak,
+           vbeln TYPE vbak-vbeln,
+           erdat TYPE erdat,
+           auart TYPE auart,
+           kunnr TYPE kunnr,
+    END OF ty_vbak.
+
+    METHODS : getdata , generate_output.
+
+
+DATA : it_vbak TYPE STANDARD TABLE OF ty_vbak,
+      o_alv TYPE REF TO cl_salv_table.
+ PRIVATE SECTION.
+    METHODS:
+      set_pf_status
+        CHANGING
+          co_alv TYPE REF TO cl_salv_table.
+ENDCLASS.
+
+START-OF-SELECTION.
+DATA : ob_report TYPE REF TO lcl_report.
+
+create OBJECT ob_report.
+
+ob_report->getdata( ).
+ob_report->generate_output( ).
+
+CLASS lcl_report IMPLEMENTATION.
+
+  method getdata.
+    SELECT vbeln erdat auart kunnr
+           INTO  TABLE it_vbak
+           FROM  vbak
+           UP TO 20 ROWS.
+  endmethod.
+  METHOD generate_output.
+        DATA: lx_msg TYPE REF TO cx_salv_msg.
+    TRY.
+        cl_salv_table=>factory(
+          IMPORTING
+            r_salv_table = o_alv
+          CHANGING
+            t_table      = it_vbak ).
+      CATCH cx_salv_msg INTO lx_msg.
+    ENDTRY.
+    CALL METHOD set_pf_status
+      CHANGING
+        co_alv = o_alv.
+    o_alv->display( ).
+    ENDMETHOD.
+     METHOD set_pf_status.
+*
+*   Calling method to set the PF-Status
+    co_alv->set_screen_status(
+      pfstatus      =  'SALV_STANDARD'
+      report        =  'SALV_DEMO_TABLE_SELECTIONS'
+      set_functions = co_alv->c_functions_all ).
+*
+  ENDMETHOD.
+    ENDCLASS.

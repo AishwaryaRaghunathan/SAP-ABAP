@@ -1,0 +1,18 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_BADI
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_BADI.
+
+DATA o_badi TYPE REF TO ZAR_BADI_1.
+
+PARAMETERS p_ctry TYPE c LENGTH 2.
+
+GET BADI o_badi
+FILTERS
+country = p_ctry.
+
+CALL BADI o_badi->calculate_gst.
+
+WRITE 'END'.

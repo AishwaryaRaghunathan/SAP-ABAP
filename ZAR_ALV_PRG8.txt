@@ -1,0 +1,119 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ALV_PRG8
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_ALV_PRG8.
+
+CLASS lcl_report DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ty_vbak,
+             vbeln TYPE vbak-vbeln,
+             erdat TYPE erdat,
+             auart TYPE auart,
+             kunnr TYPE kunnr,
+           END OF ty_vbak.
+
+    DATA: t_vbak TYPE STANDARD TABLE OF ty_vbak.
+
+    DATA: o_alv TYPE REF TO cl_salv_table.
+
+    METHODS: get_data,
+      generate_output.
+
+
+ PRIVATE SECTION.
+
+    METHODS:
+      set_hotspot_vbeln
+        CHANGING
+          co_alv   TYPE REF TO cl_salv_table
+          co_report TYPE REF TO lcl_report.
+
+    METHODS:
+      on_link_click
+        FOR EVENT link_click OF cl_salv_events_table
+          IMPORTING
+            row
+            column  .
+    "
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA: lo_report TYPE REF TO lcl_report.
+  CREATE OBJECT lo_report.
+
+  lo_report->get_data( ).
+  lo_report->generate_output( ).
+
+CLASS lcl_report IMPLEMENTATION.
+  METHOD get_data.
+    SELECT vbeln erdat auart kunnr INTO TABLE t_vbak FROM vbak UP TO 20 ROWS.
+  ENDMETHOD.
+  METHOD generate_output.
+    DATA: lx_msg TYPE REF TO cx_salv_msg.
+    TRY.
+        cl_salv_table=>factory(
+*            EXPORTING
+*              list_display   = if_salv_c_bool_sap=>false " ALV Displayed in List Mode
+*              r_container    =                           " Abstract Container for GUI Controls
+*              container_name =
+          IMPORTING
+            r_salv_table   =    o_alv                       " Basis Class Simple ALV Tables
+          CHANGING
+            t_table        = t_vbak
+        ).
+      CATCH cx_salv_msg INTO lx_msg. " ALV: General Error Class with Message
+    ENDTRY.
+
+
+  CALL METHOD set_hotspot_vbeln
+      CHANGING
+        co_alv    = o_alv
+        co_report = lo_report.
+    "
+
+    o_alv->display( ).
+
+  ENDMETHOD.
+
+
+  METHOD set_hotspot_vbeln.
+
+    DATA: lo_cols_tab TYPE REF TO cl_salv_columns_table,
+          lo_col_tab  TYPE REF TO cl_salv_column_table.
+
+    lo_cols_tab = co_alv->get_columns( ).
+
+    TRY.
+        lo_col_tab ?= lo_cols_tab->get_column( 'VBELN' ).
+      CATCH cx_salv_not_found.
+    ENDTRY.
+
+    TRY.
+        CALL METHOD lo_col_tab->set_cell_type
+          EXPORTING
+            value = if_salv_c_cell_type=>hotspot.
+        .
+      CATCH cx_salv_data_error .
+    ENDTRY.
+
+    DATA: lo_events TYPE REF TO cl_salv_events_table.
+
+    lo_events = o_alv->get_event( ).
+
+    SET HANDLER co_report->on_link_click FOR lo_events.
+*
+  ENDMETHOD.
+  METHOD on_link_click.
+*
+    DATA: la_vbak TYPE ty_vbak.
+
+    READ TABLE lo_report->t_vbak INTO la_vbak INDEX row.
+    IF la_vbak-vbeln IS NOT INITIAL.
+      MESSAGE i398(00) WITH 'You have selected' la_vbak-vbeln.
+    ENDIF.
+*
+  ENDMETHOD.
+ENDCLASS.

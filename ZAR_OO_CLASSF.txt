@@ -1,0 +1,99 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ALV_CLASSF
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_OO_CLASSF.
+
+CLASS lcl_counter DEFINITION.
+  PUBLIC SECTION.
+  DATA count TYPE i.
+  METHODS next_number EXPORTING number type i.
+  PROTECTED SECTION.
+
+  PRIVATE SECTION.
+
+ENDCLASS.
+CLASS lcl_counter IMPLEMENTATION.
+  method NEXT_NUMBER.
+    number = count + 1.
+    count = number.
+  ENDMETHOD.
+ENDCLASS.
+
+DATA : v_doc TYPE i.
+DATA v_tag TYPE i.
+DATA o_doc TYPE REF TO ZCL_AR_COUNTER.
+DATA o_tag TYPE REF TO lcl_counter.
+START-OF-SELECTION.
+CREATE OBJECT o_doc.
+CREATE OBJECT o_tag.
+
+o_doc->next_number(
+  IMPORTING
+    number = v_doc
+).
+
+o_tag->next_number(
+  IMPORTING
+    number = v_tag
+).
+
+o_tag->next_number(
+  IMPORTING
+    number = v_tag
+).
+
+o_doc->next_number(
+  IMPORTING
+    number = v_doc
+).
+
+o_doc->next_number(
+  IMPORTING
+    number = v_doc
+).
+
+o_doc->next_number(
+  IMPORTING
+    number = v_doc
+).
+CALL FUNCTION 'ZAR_COUNTER'
+ IMPORTING
+   NEXT_NUMBER       = v_doc
+          .
+
+CALL FUNCTION 'ZAR_COUNTER'
+ IMPORTING
+   NEXT_NUMBER       = v_tag
+          .
+
+CALL FUNCTION 'ZAR_COUNTER'
+ IMPORTING
+   NEXT_NUMBER       = v_tag
+          .
+
+CALL FUNCTION 'ZAR_COUNTER'
+ IMPORTING
+   NEXT_NUMBER       = v_doc
+          .
+
+CALL FUNCTION 'ZAR_COUNTER'
+ IMPORTING
+   NEXT_NUMBER       = v_tag
+          .
+
+CALL FUNCTION 'ZAR_COUNTER'
+ IMPORTING
+   NEXT_NUMBER       = v_tag
+          .
+
+CALL FUNCTION 'ZAR_COUNTER'
+ IMPORTING
+   NEXT_NUMBER       = v_doc
+          .
+
+CALL FUNCTION 'ZAR_COUNTER'
+ IMPORTING
+   NEXT_NUMBER       = v_doc
+          .

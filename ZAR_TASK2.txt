@@ -1,0 +1,49 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_TASK2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_TASK2.
+
+*internal tables
+
+PARAMETERS p_matnr TYPE makt-matnr.
+
+TYPES: BEGIN OF ty_makt,
+         matnr TYPE makt-matnr,
+         spras TYPE makt-spras,
+         maktx TYPE makt-maktx,
+       END OF ty_makt.
+
+*       DATA: st_makt TYPE makt.
+
+DATA: it_makt TYPE TABLE OF ty_makt,
+      wa_makt LIKE LINE OF it_makt.
+
+
+CALL FUNCTION 'ZAR_TASK1'
+  EXPORTING
+    im_matnr               = p_matnr
+ IMPORTING
+   EX_MAKT                = it_makt
+* EXCEPTIONS
+*   INVALID_MATERIAL       = 1
+*   OTHERS                 = 2
+          .
+IF sy-subrc <> 0.
+* Implement suitable error handling here
+ENDIF.
+
+
+SELECT MATNR SPRAS MAKTX FROM MAKT INTO TABLE IT_MAKT WHERE MATNR EQ P_MATNR.
+
+  LOOP AT it_makt INTO wa_makt.
+
+    Write:/ 'Material number',
+        20'Language',
+        50 'Description'.
+
+Write: / wa_makt-matnr,
+         20 wa_makt-spras,
+         50 wa_makt-maktx.
+  ENDLOOP.

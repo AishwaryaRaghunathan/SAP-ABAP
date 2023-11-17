@@ -29,6 +29,7 @@ START-OF-SELECTION.
   PERFORM display IN PROGRAM ZAR_SUBROUTINETASKC USING s_num[] CHANGING it_header.
   PERFORM display_header.
 
+
 END-OF-SELECTION.
 
 AT LINE-SELECTION.
@@ -49,7 +50,7 @@ AT LINE-SELECTION.
 *& <--  p2        text
 *&---------------------------------------------------------------------*
 FORM display_header .
-  LOOP AT it_header INTO wa_header.
+ LOOP AT it_header INTO wa_header.
     WRITE : / wa_header-vbeln,
               wa_header-audat,
               wa_header-netwr LEFT-JUSTIFIED,

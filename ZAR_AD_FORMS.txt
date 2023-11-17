@@ -1,0 +1,75 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_AD_FORMS
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_AD_FORMS.
+
+DATA it_makt TYPE ZDEMO_TB_MAKT.
+DATA v_matnr TYPE matnr.
+
+SELECT-OPTIONS s_matnr FOR v_matnr.
+
+START-OF-SELECTION.
+
+SELECT matnr spras maktx FROM makt INTO TABLE it_makt WHERE matnr IN s_matnr.
+DATA outputparams TYPE  SFPOUTPUTPARAMS.
+
+  CALL FUNCTION 'FP_JOB_OPEN'
+    CHANGING
+      ie_outputparams       = outputparams
+*   EXCEPTIONS
+*     CANCEL                = 1
+*     USAGE_ERROR           = 2
+*     SYSTEM_ERROR          = 3
+*     INTERNAL_ERROR        = 4
+*     OTHERS                = 5
+            .
+  IF sy-subrc <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+
+*CALL FUNCTION '/1BCDWB/SM00000120'
+*  EXPORTING
+**   /1BCDWB/DOCPARAMS        =
+*    it_makt                  = it_makt
+** IMPORTING
+**   /1BCDWB/FORMOUTPUT       =
+** EXCEPTIONS
+**   USAGE_ERROR              = 1
+**   SYSTEM_ERROR             = 2
+**   INTERNAL_ERROR           = 3
+**   OTHERS                   = 4
+*          .
+*IF sy-subrc <> 0.
+** Implement suitable error handling here
+*ENDIF.
+CALL FUNCTION '/1BCDWB/SM00000182'
+* EXPORTING
+*   /1BCDWB/DOCPARAMS        =
+* IMPORTING
+*   /1BCDWB/FORMOUTPUT       =
+* EXCEPTIONS
+*   USAGE_ERROR              = 1
+*   SYSTEM_ERROR             = 2
+*   INTERNAL_ERROR           = 3
+*   OTHERS                   = 4
+          .
+IF sy-subrc <> 0.
+* Implement suitable error handling here
+ENDIF.
+
+
+CALL FUNCTION 'FP_JOB_CLOSE'
+* IMPORTING
+*   E_RESULT             =
+* EXCEPTIONS
+*   USAGE_ERROR          = 1
+*   SYSTEM_ERROR         = 2
+*   INTERNAL_ERROR       = 3
+*   OTHERS               = 4
+          .
+IF sy-subrc <> 0.
+* Implement suitable error handling here
+ENDIF.

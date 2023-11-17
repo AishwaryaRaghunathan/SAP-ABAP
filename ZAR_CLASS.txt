@@ -1,0 +1,57 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ALVCLASS
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_CLASS.
+
+class lc_count DEFINITION.
+  PUBLIC SECTION.
+  DATA count type i.
+  METHODS next_number EXPORTING NUMBER TYPE i.
+  ENDCLASS.
+
+  class lc_count IMPLEMENTATION.
+    method next_number.
+      number = count + 1.
+      count = number.
+      ENDMETHOD.
+      ENDCLASS.
+
+      DATA : v_doc type i,
+             v_tag type i,
+             o_doc type ref to lc_count,
+             o_tag type ref to lc_count.
+      START-OF-SELECTION.
+      CREATE OBJECT o_doc.
+      CREATE OBJECT o_tag.
+
+      o_doc->next_number(
+      IMPORTING
+        number = v_doc
+        ).
+
+       o_doc->next_number(
+      IMPORTING
+        number = v_doc
+        ).
+
+       o_tag->next_number(
+      IMPORTING
+        number = v_tag
+        ).
+
+       o_doc->next_number(
+      IMPORTING
+        number = v_doc
+        ).
+
+       o_tag->next_number(
+      IMPORTING
+        number = v_tag
+        ).
+
+       o_tag->next_number(
+      IMPORTING
+        number = v_tag
+        ).

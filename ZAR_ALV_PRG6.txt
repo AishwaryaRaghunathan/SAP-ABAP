@@ -1,0 +1,87 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ALV_PRG6
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_ALV_PRG6.
+
+  CLASS lcl_report DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ty_vbak,
+             vbeln TYPE vbak-vbeln,
+             erdat TYPE erdat,
+             auart TYPE auart,
+             kunnr TYPE kunnr,
+           END OF ty_vbak.
+
+    DATA: t_vbak TYPE STANDARD TABLE OF ty_vbak.
+
+    DATA: o_alv TYPE REF TO cl_salv_table.  "alv refe
+
+    METHODS: get_data,
+      generate_output.
+
+    " defining new methods
+ PRIVATE SECTION.
+    METHODS:
+      set_display_setting
+        CHANGING
+          co_alv TYPE REF TO cl_salv_table.
+    "
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA: lo_report TYPE REF TO lcl_report.
+  CREATE OBJECT lo_report.
+
+  lo_report->get_data( ).
+  lo_report->generate_output( ).
+
+CLASS lcl_report IMPLEMENTATION.
+  METHOD get_data.
+    SELECT vbeln erdat auart kunnr INTO TABLE t_vbak FROM vbak UP TO 20 ROWS.
+  ENDMETHOD.
+  METHOD generate_output.
+    DATA: lx_msg TYPE REF TO cx_salv_msg.
+    TRY.
+        cl_salv_table=>factory(
+*            EXPORTING
+*              list_display   = if_salv_c_bool_sap=>false " ALV Displayed in List Mode
+*              r_container    =                           " Abstract Container for GUI Controls
+*              container_name =
+          IMPORTING
+            r_salv_table   =    o_alv                       " Basis Class Simple ALV Tables
+          CHANGING
+            t_table        = t_vbak
+        ).
+      CATCH cx_salv_msg INTO lx_msg. " ALV: General Error Class with Message
+    ENDTRY.
+
+    " calling the new method
+    CALL METHOD set_display_setting
+      CHANGING
+        co_alv = o_alv.
+    "
+
+    o_alv->display( ).
+
+  ENDMETHOD.
+
+  " implementing the new methods
+  " calling method to set the pf status
+   METHOD set_display_setting.
+*
+    DATA: lo_display TYPE REF TO cl_salv_display_settings.
+*
+*   get display object
+    lo_display = co_alv->get_display_settings( ).
+*
+*   set ZEBRA pattern
+    lo_display->set_striped_pattern( 'X' ).
+*
+*   Title to ALV
+    lo_display->set_list_header( 'ALV Test for Display Settings' ).
+  "
+ENDMETHOD.
+ENDCLASS.

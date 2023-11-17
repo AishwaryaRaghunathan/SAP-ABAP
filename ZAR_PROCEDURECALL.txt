@@ -1,0 +1,15 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_PROCEDURECALL
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_PROCEDURECALL.
+
+DATA v_date type sy-datum.
+v_date = sy-datum.
+write v_date.
+AT LINE-SELECTION.
+  EXPORT v_date TO MEMORY ID 'AR'.
+  SEt PARAMETER ID 'AR' FIELD v_date.
+SUBMIT ZDEMO_PROCEDURE AND RETURN.
+WRITE 'end'.

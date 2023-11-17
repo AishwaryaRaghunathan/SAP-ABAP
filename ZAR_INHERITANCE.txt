@@ -1,0 +1,23 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_INHERITANCE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_INHERITANCE.
+
+DATA : o_super TYPE REF TO ZCL_AR_SUPER,
+       o_sub TYPE REF TO ZCL_AR_SUB.
+
+CREATE OBJECT : o_super, o_sub.
+
+o_super->get_mileage( ).
+o_sub->get_mileage( ).
+o_sub->get_seats( ).
+
+o_super = o_sub.
+*o_sub = o_super.
+o_super->get_mileage( ).
+*o_sub ?= o_super.
+
+
+WRITE 'end'.

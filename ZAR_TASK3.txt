@@ -1,0 +1,49 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_TASK2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_TASK2.
+
+TYPES: BEGIN OF ty_makt,
+        matnr TYPE makt-matnr,
+        spras TYPE makt-spras,
+        maktx TYPE makt-maktx,
+       END OF ty_makt.
+
+
+DATA : it_makt TYPE STANDARD TABLE OF ty_makt,
+       wa_makt LIKE LINE OF it_makt.
+
+SELECT-OPTIONS s_num for wa_makt-matnr.
+
+START-OF-SELECTION.
+
+
+PERFORM display USING s_num[] CHANGING it_makt.
+END-OF-SELECTION.
+*&---------------------------------------------------------------------*
+*& Form display
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*&      --> S_NUM[]
+*&      <-- IT_MAKT
+*&---------------------------------------------------------------------*
+FORM display  USING    p_s_num
+              CHANGING p_it_makt.
+
+  SELECT matnr spras maktx FROM makt INTO TABLE it_makt WHERE matnr IN s_num.
+    LOOP AT it_makt INTO wa_makt.
+
+Write:/ 'Material number',
+        20'Language',
+        50 'Description'.
+
+Write: / wa_makt-matnr,
+         20 wa_makt-spras,
+         50 wa_makt-maktx.
+
+ENDLOOP.
+
+ENDFORM.

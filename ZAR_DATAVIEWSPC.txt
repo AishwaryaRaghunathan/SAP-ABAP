@@ -1,0 +1,23 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_DATAVIEWSPC
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_DATAVIEWSPC.
+
+DATA: it_plant TYPE STANDARD TABLE OF ZAR_DATAVIEW,
+      wa_plant LIKE LINE OF it_plant.
+
+SELECT-OPTIONS s_matnr FOR wa_plant-matnr.
+PARAMETERS p_werks TYPE werks_d.
+
+SELECT * FROM ZAR_DATAVIEW INTO TABLE it_plant WHERE matnr IN s_matnr.
+
+LOOP AT it_plant INTO wa_plant.
+  IF wa_plant-werks EQ p_werks.
+    WRITE: / wa_plant-matnr, 40 wa_plant-werks COLOR COL_POSITIVE,
+           120 wa_plant-name1.
+  ELSE.
+    WRITE: / wa_plant-matnr, 40 wa_plant-werks, 120 wa_plant-name1.
+  ENDIF.
+ENDLOOP.
