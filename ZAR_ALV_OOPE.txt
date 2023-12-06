@@ -1,0 +1,87 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ALV_OOPE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_ALV_OOPE.
+
+DATA : it_vbak     TYPE ZAR_T_vbak,
+       wa_vbak     LIKE LINE OF it_vbak,
+       it_kna1     TYPE ZAR_T_kna1,
+       wa_kna1     LIKE LINE OF it_kna1,
+       it_vbap     TYPE ZAR_T_vbap,
+       wa_vbap     LIKE LINE OF it_vbap,
+       it_t006a    TYPE ZAR_T_t006a,
+       wa_t006a    LIKE LINE OF it_t006a,
+       it_header   TYPE ZAR_T_header,
+       wa_header   LIKE LINE OF it_header,
+       it_item     TYPE ZAR_T_item,
+       wa_item     LIKE LINE OF it_item.
+
+SELECT-OPTIONS s_vbeln for wa_vbak-vbeln.
+
+
+
+class lcl_item DEFINITION.
+  public section.
+  methods raise_doubleclick for event double_click of cl_salv_events_table importing row column.
+  endclass.
+
+  class lcl_item IMPLEMENTATION.
+    method raise_doubleclick.
+
+    read table it_header into wa_header index row.
+    clear it_item.
+    select vbeln posnr pstyv arktx kwmeng zieme netwr from  vbap into table it_vbap where vbeln eq wa_header-vbeln.
+      select msehi msehl from t006a into table it_t006a for all entries in it_vbap where msehi eq it_vbap-zieme.
+        loop at it_vbap into wa_vbap.
+          read table it_t006a into wa_t006a with key msehi = wa_vbap-zieme.
+          MOVE-CORRESPONDING wa_vbap to wa_item.
+          MOVE-CORRESPONDING wa_t006a to wa_item.
+          append wa_item to it_item.
+          clear wa_item.
+          endloop.
+
+          cl_salv_table=>factory(
+*            EXPORTING
+*              list_display   = if_salv_c_bool_sap=>false " ALV Displayed in List Mode
+*              r_container    =                           " Abstract Container for GUI Controls
+*              container_name =
+            IMPORTING
+              r_salv_table   =  data(o_alv)                         " Basis Class Simple ALV Tables
+            CHANGING
+              t_table        = it_item
+          ).
+*          CATCH cx_salv_msg. " ALV: General Error Class with Message
+o_alv->display( ).
+endmethod.
+endclass.
+
+data o_event type ref to lcl_item.
+START-OF-SELECTION.
+
+create object o_event.
+  SELECT vbeln audat netwr kunnr FROM vbak INTO TABLE it_vbak WHERE vbeln IN s_vbeln.
+  SELECT kunnr name1 FROM kna1 INTO TABLE it_kna1 FOR ALL ENTRIES IN it_vbak WHERE kunnr EQ it_vbak-kunnr.
+  LOOP AT it_vbak INTO wa_vbak.
+    READ TABLE it_kna1 INTO wa_kna1 WITH KEY kunnr = wa_vbak-kunnr.
+    MOVE-CORRESPONDING wa_vbak TO wa_header.
+    MOVE-CORRESPONDING wa_kna1 TO wa_header.
+    APPEND wa_header TO it_header.
+    CLEAR wa_header.
+  ENDLOOP.
+  cl_salv_table=>factory(
+*    EXPORTING
+*      list_display   = if_salv_c_bool_sap=>false " ALV Displayed in List Mode
+*      r_container    =                           " Abstract Container for GUI Controls
+*      container_name =
+    IMPORTING
+      r_salv_table   =     data(o_alv1)                      " Basis Class Simple ALV Tables
+    CHANGING
+      t_table        =  it_header
+  ).
+*  CATCH cx_salv_msg. " ALV: General Error Class with Message
+  data(o_event_class) = o_alv1->get_event( ).
+
+  set handler o_event->raise_doubleclick for o_event_class.
+  o_alv1->display( ).

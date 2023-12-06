@@ -1,0 +1,46 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ALV_OOPE1
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_ALV_OOPE1.
+
+TYPES :BEGIN OF ty_marc,
+       matnr TYPE marc-matnr,
+       werks TYPE marc-werks,
+       END OF ty_marc.
+
+DATA v_matnr TYPE marc-matnr.
+DATA: it_marc TYPE STANDARD TABLE OF ty_marc,
+      o_alv TYPE REF TO cl_salv_table.
+
+SELECT-OPTIONS s_matnr FOR v_matnr.
+
+START-OF-SELECTION.
+  PERFORM get_data.
+  PERFORM display.
+
+END-OF-SELECTION.
+
+
+FORM get_data .
+  SELECT matnr werks FROM marc INTO TABLE it_marc UP TO 50 ROWS.
+ENDFORM.
+
+FORM display .
+  cl_salv_table=>factory(
+*  EXPORTING
+*    list_display   = if_salv_c_bool_sap=>false " ALV Displayed in List Mode
+*    r_container    =                           " Abstract Container for GUI Controls
+*    container_name =
+    IMPORTING
+      r_salv_table   =   DATA(o_alv)
+                              " Basis Class Simple ALV Tables
+    CHANGING
+      t_table        = it_marc
+  ).
+
+*CATCH cx_salv_msg. " ALV: General Error Class with Message
+  o_alv->display( ).
+
+ENDFORM.

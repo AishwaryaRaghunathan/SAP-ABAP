@@ -1,0 +1,28 @@
+*&---------------------------------------------------------------------*
+*& Report ZAR_ALV_CDSVIEW
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZAR_ALV_CDSVIEW.
+
+START-OF-SELECTION.
+  PERFORM display_alv.
+
+FORM display_alv.
+  cl_salv_gui_table_ida=>create_for_cds_view('ZAR_ALV')->fullscreen( )->display( ).
+ENDFORM.
+
+*DATA lo_alv TYPE REF TO cl_salv_gui_table_ida.
+*
+*START-OF-SELECTION.
+*  PERFORM create_alv.
+*  PERFORM display_alv.
+*
+*FORM create_alv.
+*  lo_alv = cl_salv_gui_table_ida=>create_for_cds_view('ZAR_ALV').
+*ENDFORM.
+*
+*FORM display_alv.
+*  lo_alv->fullscreen( )->display( ).
+*ENDFORM.
+*
